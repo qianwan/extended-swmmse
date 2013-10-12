@@ -14,7 +14,7 @@ numCases = 100;
 totalSumRate = 0;
 totalNumIterations = 0;
 maxIterations = 1000;
-epsilon = 1e-3;
+epsilon = 1e-2;
 for i = 1 : numCases
   numIterations = 0;
   prev = 0.0;
@@ -31,7 +31,7 @@ for i = 1 : numCases
     V = iterateWMMSE(K, Q, M, I, N, mmse, P, H, W, U);
     [U, W, R] = updateWMMSEVariables(K, Q, M, I, N, H, V);
   end
-  fprintf('Case #%d: %f\n', i, sum(R));
+  fprintf('Case #%d: sum rate = %f, #iterations%d\n', i, sum(R), numIterations);
   totalSumRate = totalSumRate + sum(R);
   totalNumIterations = totalNumIterations + numIterations;
 end

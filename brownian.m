@@ -1,9 +1,8 @@
-function [BSs, UEs] = brownian(outerRadius, locations, Q, I)
-  K = length(locations);
+function [BSs, UEs] = brownian(K, Q, I, locations, outerRadius)
   BSs = zeros(K * Q, 1);
-  UEs = zeros(I * I, 1);
-  for i = 1 : K
-    for j = 1 : Q
+  UEs = zeros(K * I, 1);
+  for k = 1 : K
+    for q = 1 : Q
       x = 0;
       y = 0;
       while true
@@ -13,15 +12,15 @@ function [BSs, UEs] = brownian(outerRadius, locations, Q, I)
         my = abs(y);
         valid = true;
         if my > outerRadius * sin(pi / 3) || (sqrt(3) * mx + my > outerRadius * sqrt(3))
-           valid = false;
+          valid = false;
         end
         if valid == true
           break;
         end
       end
-      BSs((i - 1) * Q + j) = x + y * 1j + locations(i);
+      BSs((k - 1) * Q + q) = x + y * 1j + locations(k);
     end
-    for j = 1 : I
+    for i = 1 : I
       while true
         x = (rand - 0.5) * 2 * outerRadius;
         y = (rand - 0.5) * 2 * outerRadius;
@@ -35,7 +34,7 @@ function [BSs, UEs] = brownian(outerRadius, locations, Q, I)
           break;
         end
       end
-      UEs((i - 1) * I + j) = x + y * 1j + locations(i);
+      UEs((k - 1) * I + i) = x + y * 1j + locations(k);
     end
   end
   return

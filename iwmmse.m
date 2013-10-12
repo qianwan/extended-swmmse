@@ -7,9 +7,8 @@ SNRdB = 25;
 SNR = 10^(SNRdB / 10);
 P = SNR;
 clusterLocations = [0 + 0j, 0 + 2000j, 0 - 2000j];
-clusterClosures = [1 : 1 : 3]';
 %clusterLocations = [0 + 0j, 0 + 2000j, 0 - 2000j, 0 + 4000j, 0 - 4000j, 0 + 6000j, 0 - 6000j, 0 + 8000j, 0 - 8000j, 0 + 10000j];
-%clusterClosures = [1 : 1 : 10]';
+clusterClosures = findClusterClosures(clusterLocations, 1000);
 [bsLocations, ueLocations] = brownian(2000 / sqrt(3), clusterLocations, Q, I);
 
 numCases = 100;

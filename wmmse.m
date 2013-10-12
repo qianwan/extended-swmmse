@@ -31,9 +31,9 @@ for i = 1 : numCases
     V = iterateWMMSE(K, Q, M, I, N, mmse, P, H, W, U);
     [U, W, R] = updateWMMSEVariables(K, Q, M, I, N, H, V);
   end
-  fprintf('Case #%d: sum rate = %f, #iterations%d\n', i, sum(R), numIterations);
+  fprintf(2, 'Case #%d: sum rate = %f, #iterations%d\n', i, sum(R), numIterations);
   totalSumRate = totalSumRate + sum(R);
   totalNumIterations = totalNumIterations + numIterations;
 end
-fprintf('Avg sum rate: %f\n', totalSumRate / numCases);
-fprintf('Avg number of iterations: %f\n', totalNumIterations / numCases);
+fprintf(2, 'Avg sum rate: %f\n', totalSumRate / numCases);
+fprintf(2, 'Avg number of iterations: %f\n', totalNumIterations / numCases);

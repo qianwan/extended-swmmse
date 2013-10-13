@@ -6,8 +6,9 @@ I = 40;
 SNRdB = 25;
 SNR = 10^(SNRdB / 10);
 P = SNR / Q;
-clusterLocations = [0 + 0j, 0 + 2000j, 2000 * cos(pi / 6) + 2000 * sin(pi / 6) * 1j, -2000 * cos(pi / 6) + 2000 * sin(pi / 6) * 1j];
-clusterClosures = findClusterClosures(clusterLocations, 1000);
+clusterLocations = [0 + 0j, 0 + 2000j, ...
+2000 * cos(pi / 6) + 2000 * sin(pi / 6) * 1j, -2000 * cos(pi / 6) + 2000 * sin(pi / 6) * 1j];
+closures = findClusterClosures(clusterLocations, 2100);
 [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, 2000 / sqrt(3));
 
 numCases = 100;
@@ -18,9 +19,10 @@ epsilon = 1e-1;
 for i = 1 : numCases
   numIterations = 0;
   prev = 0.0;
+  [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, 2000 / sqrt(3));
   H = generateMIMOChannel(K, Q, M, bsLocations, I, N, ueLocations, 2);
-  V = generateRandomTxVector(K, Q, M, I, P, clusterClosures);
-  [U, W, R] = updateWMMSEVariables(K, Q, M, I, N, H, V);
+  [V, A] = generateRandomTxVector(K, Q, M, I, P, closures);
+  [U, W, R] = updatePSWMmseVariables(K, Q, M, I, N, H, V, closures);
   while abs(prev - sum(R)) > epsilon
     prev = sum(R);
     numIterations = numIterations + 1;
@@ -28,12 +30,11 @@ for i = 1 : numCases
       numIterations = numIterations - 1;
       break;
     end
-    mmse = updateMmseMMatrix(K, Q, M, I, N, H, U, W);
-    V = iterateWMMSE(K, Q, M, I, N, mmse, P, H, W, U);
-    [U, W, R] = updateWMMSEVariables(K, Q, M, I, N, H, V);
-    fprintf(2, 'sum rate @#%d in case#%d: %f\n', numIterations, i , sum(R));
+    mmse = updatePSWMmseMatrix(K, Q, M, I, N, H, U, W);
+    [V, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H, V, U, W, L);
+    [U, W, R] = updatePSWMmseVariables(K, Q, M, I, N, H, V, closures);
+    A = updatePowerAllocation(K, Q, I, P, A, S, closures);
   end
-  fprintf(2, 'Case #%d: R = %f, # = %d\n', i, sum(R), numIterations);
   totalSumRate = totalSumRate + sum(R);
   totalNumIterations = totalNumIterations + numIterations;
 end

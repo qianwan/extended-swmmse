@@ -13,6 +13,6 @@ function mmse = updateMmseMMatrix(K, Q, M, I, N, H, U, W)
       end
     end
     offset = (k - 1) * Q * M;
-    mmse(offset + 1 : offset + Q * M, 1 : Q * M) = m;
+    mmse(offset + 1 : offset + Q * M, :) = m;
   end
   return

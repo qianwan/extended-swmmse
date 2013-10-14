@@ -1,3 +1,4 @@
+clear;
 K = 4;
 M = 4;
 N = 2;
@@ -6,7 +7,9 @@ I = 40;
 SNRdB = 25;
 SNR = 10^(SNRdB / 10);
 P = SNR / Q;
-clusterLocations = [0 + 0j, 0 + 2000j, 2000 * cos(pi / 6) + 2000 * sin(pi / 6) * 1j, -2000 * cos(pi / 6) + 2000 * sin(pi / 6) * 1j];
+clusterLocations = [0 + 0j, 0 + 2000j, ...
+                    2000 * cos(pi / 6) + 2000 * sin(pi / 6) * 1j, ...
+                    -2000 * cos(pi / 6) + 2000 * sin(pi / 6) * 1j];
 clusterClosures = findClusterClosures(clusterLocations, 1000);
 [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, 2000 / sqrt(3));
 
@@ -14,7 +17,7 @@ numCases = 100;
 totalSumRate = 0;
 totalNumIterations = 0;
 maxIterations = 1e6;
-epsilon = 1e-1;
+epsilon = 1;
 for i = 1 : numCases
   numIterations = 0;
   prev = 0.0;
@@ -31,7 +34,7 @@ for i = 1 : numCases
     mmse = updateMmseMMatrix(K, Q, M, I, N, H, U, W);
     V = iterateWMMSE(K, Q, M, I, N, mmse, P, H, W, U);
     [U, W, R] = updateWMMSEVariables(K, Q, M, I, N, H, V);
-    fprintf(2, 'sum rate @#%d in case#%d: %f\n', numIterations, i , sum(R));
+    %fprintf(2, 'sum rate @#%d in case#%d: %f\n', numIterations, i , sum(R));
   end
   fprintf(2, 'Case #%d: R = %f, # = %d\n', i, sum(R), numIterations);
   totalSumRate = totalSumRate + sum(R);

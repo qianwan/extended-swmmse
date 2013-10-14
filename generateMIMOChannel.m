@@ -13,8 +13,8 @@ function H = generateMIMOChannel(K, Q, M, bsLocations, I, N, ueLocations, model)
         colOffset = (k1 - 1) * Q * M + (q - 1) * M;
         for k2 = 1 : K
           for i = 1 : I
-            rowOffset = (k2 - 1) * I * N + (i - 1) * N;
             d = abs(bsLocations((k1 - 1) * Q + q) - ueLocations((k2 - 1) * I + i));
+            rowOffset = (k2 - 1) * I * N + (i - 1) * N;
             H(rowOffset + 1 : rowOffset + N, colOffset + 1 : colOffset + M) = model2(N, M, d);
           end
         end

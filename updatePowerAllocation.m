@@ -2,7 +2,7 @@ function An = updatePowerAllocation(K, Q, I, P, A, S, closures)
   An = A;
   for l = 1 : K
     for q = 1 : Q
-      sub = S((l - 1) * Q + q, :);
+      sub = -S((l - 1) * Q + q, :);
       alloc = A((l - 1) * Q + q, :);
       direc = zeros(1, K * I);
       relaxH = 0;
@@ -35,7 +35,7 @@ function An = updatePowerAllocation(K, Q, I, P, A, S, closures)
   end
   return
 
-function proj = waterFilling(K, I, closure, direc, relax, epsilon)
+function proj = waterFilling(K, I, closure, direc, relax, reverse)
   proj = zeros(1, K * I);
   for k = closure
   	if k == 0
@@ -43,7 +43,11 @@ function proj = waterFilling(K, I, closure, direc, relax, epsilon)
     end
   	for i = 1 : I
       j = (k - 1) * I + i;
-      proj(j) = (direc(j) - relax <= epsilon) ? epsilon : direc(j) - relax;
+      if direc(j) - relax <= reverse
+        proj(j) = reverse;
+      else
+        proj(j) = direc(j) - relax;
+      end
   	end
   end
   return

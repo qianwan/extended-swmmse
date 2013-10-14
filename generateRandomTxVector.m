@@ -1,22 +1,22 @@
-function [V, A] = generateRandomTxVector(K, Q, M, I, P, clusterClosures)
+function [V, A] = generateRandomTxVector(K, Q, M, I, P, closures)
   V = zeros(K * Q * M, K * I);
   A = zeros(K * Q, K * I);
-  for m = 1 : K
-    closures = clusterClosures(m, :);
-    numUEs = nnz(closures) * I;
+  for l = 1 : K
+    closure = closures(l, :);
+    numUEs = nnz(closure) * I;
     power = P / numUEs;
-    for q = 1 : Q
-      for c = closures
-        if c == 0
-          continue;
-        end
+    for k = closure
+      if k == 0
+        continue;
+      end
+      for q = 1 : Q
         for i = 1 : I
           v = randn(M, 1) + randn(M, 1) * 1j;
           v = v / norm(v, 2) * sqrt(power);
-          rowOffset = (m - 1) * Q * M + (q - 1) * M;
-          colOffset = (c - 1) * I + i;
+          rowOffset = (l - 1) * Q * M + (q - 1) * M;
+          colOffset = (k - 1) * I + i;
           V(rowOffset + 1 : rowOffset + M, colOffset) = v;
-          A((m - 1) * Q + q, (c - 1) * I + i) = power;
+          A((l - 1) * Q + q, (k - 1) * I + i) = power;
         end
       end
     end

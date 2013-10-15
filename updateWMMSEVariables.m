@@ -22,10 +22,10 @@ function [U, W, R] = updateWMMSEVariables(K, Q, M, I, N, H, V)
       v = V(rowOffset + 1 : rowOffset + Q * M, colOffset);
       localHv = h * v;
       offset = (k - 1) * I * N + (i - 1) * N;
-      U(offset + 1 : offset + N) = inv(C) * localHv;
+      U(offset + 1 : offset + N) = C \ localHv;
       W((k - 1) * I + i) = 1 / (1 - real(dot(U(offset + 1 : offset + N), localHv)));
       L = C - localHv * localHv';
-      R((k - 1) * I + i) = log2(real(det(eye(N) + localHv * localHv' * inv(L))));
+      R((k - 1) * I + i) = log2(real(det(eye(N) + localHv * localHv' / L)));
     end
   end
   return

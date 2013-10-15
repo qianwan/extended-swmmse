@@ -2,17 +2,18 @@ clear;
 K = 4;
 M = 4;
 N = 2;
-Q = 10;
-I = 20;
-SNRdB = 30;
+Q = 5;
+I = 10;
+SNRdB = 15;
 SNR = 10^(SNRdB / 10);
+r = 1000;
 P = SNR / Q;
 clusterLocations = [0 + 0j, ...
-                    0 + 2000j, ...
-                    2000 * cos(pi / 6) + 2000 * sin(pi / 6) * 1j, ...
-                    -2000 * cos(pi / 6) + 2000 * sin(pi / 6) * 1j];
-closures = findClusterClosures(clusterLocations, 1000);
-[bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, 2000 / sqrt(3));
+                    0 + r * 1j, ...
+                    r * cos(pi / 6) + r * sin(pi / 6) * 1j, ...
+                    -r * cos(pi / 6) + r * sin(pi / 6) * 1j];
+closures = findClusterClosures(clusterLocations, r);
+[bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
 
 numCases = 100;
 totalSumRate = 0;
@@ -22,7 +23,7 @@ epsilon = 1e-1;
 for i = 1 : numCases
   numIterations = 0;
   prev = 0;
-  [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, 2000 / sqrt(3));
+  [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
   H = generateMIMOChannel(K, Q, M, bsLocations, I, N, ueLocations, 2);
   [V, A] = generateRandomTxVector(K, Q, M, I, P, closures);
   [U, W, R] = updateWMMSEVariables(K, Q, M, I, N, H, V);

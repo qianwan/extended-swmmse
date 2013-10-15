@@ -35,6 +35,5 @@ function [X, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H,
         end
       end
     end
-    fprintf(2, 'iterate subproblem %d\n', count);
   end
   return

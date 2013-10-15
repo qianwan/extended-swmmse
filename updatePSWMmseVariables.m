@@ -26,13 +26,13 @@ function [U, W, R] = updatePSWMmseVariables(K, Q, M, I, N, H, V)
       colOffset = (k - 1) * I + i;
       v = V(:, colOffset);
       localHv = h * v;
-      u = inv(C) * localHv;
+      u = C \ localHv;
       rowOffset = (k - 1) * I * N + (i - 1) * N;
       U(rowOffset + 1 : rowOffset + N) = u;
       W((k - 1) * I + i) = 1 / (1 - real(dot(localHv, u)));
       localHvvH = localHv * localHv';
       L = C - localHvvH;
-      R((k - 1) * I + i) = log2(real(det(eye(N) + localHvvH * inv(L))));
+      R((k - 1) * I + i) = log2(real(det(eye(N) + localHvvH / L)));
     end
   end
   return

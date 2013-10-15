@@ -12,23 +12,30 @@ function An = updatePowerAllocation(K, Q, I, P, A, S, closures, delta)
         end
         for i = 1 : I
           a = alloc((k - 1) * I + i);
-          direc((k - 1) * I + i) = a - sub((k - 1) * I + i) * delta;
+          direc((k - 1) * I + i) = a - sub((k - 1) * I + i) * a * delta;
           if direc((k - 1) * I + i) > relaxH
           	relaxH = direc((k - 1) * I + i);
           end
         end
       end
       relaxL = 0;
+      relaxH = 100;
       relax = (relaxL + relaxH) / 2;
-      proj = waterFilling(K, I, closures(l, :), direc, relax, 1e-6);
-      while abs(sum(proj) - P) / P > 1e-6
+      epsilon = 1e-6;
+      proj = waterFilling(K, I, closures(l, :), direc, relax, epsilon);
+      if (sum(waterFilling(K, I, closures(l, :), direc, relaxH, epsilon)) > P) && (sum(waterFilling(K, I, closures(l, :), direc, relaxL, epsilon)) > P)
+        fprintf(2, 'Stuck hereA\n');
+      end
+      while abs(sum(proj) - P) > 1e-5
         if sum(proj) > P
           relaxL = relax;
         elseif sum(proj) < P
           relaxH = relax;
+        else
+          break;
         end
         relax = (relaxL + relaxH) / 2;
-        proj = waterFilling(K, I, closures(l, :), direc, relax, 0);
+        proj = waterFilling(K, I, closures(l, :), direc, relax, epsilon);
       end
       An((l - 1) * Q + q, :) = proj;
     end

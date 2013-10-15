@@ -6,7 +6,7 @@ function mmse = updatePSWMmseMatrix(K, Q, M, I, N, H, U, W)
       h = H(offset + 1 : offset + N, :);
       u = U(offset + 1 : offset + N, :);
       w = W((k - 1) * I + i);
-      mmse = mmse + w * h' * u * u' * h;
+      mmse = mmse + w * h' * (u * u') * h;
     end
   end
   return

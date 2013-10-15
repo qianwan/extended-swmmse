@@ -9,7 +9,7 @@ function mmse = updateMmseMMatrix(K, Q, M, I, N, H, U, W)
         h = H(rowOffset + 1 : rowOffset + N, colOffset + 1 : colOffset + Q * M);
         offset = (k1 - 1) * I * N + (i - 1) * N;
         u = U(offset + 1 : offset + N);
-        m = m + h' * u * u' * h * W((k1 - 1) * I + i);
+        m = m + h' * (u * u') * h * W((k1 - 1) * I + i);
       end
     end
     offset = (k - 1) * Q * M;

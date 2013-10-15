@@ -2,9 +2,10 @@ function [X, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H,
   X = V;
   S = zeros(K * Q, K * I);
   count = 0;
-  maxCount = 20;
+  maxCount = 50;
   while true
     count = count + 1;
+    fprintf(2, '%d ', count);
     if count > maxCount
       break;
     end
@@ -36,4 +37,5 @@ function [X, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H,
       end
     end
   end
+  fprintf(2, '\n');
   return

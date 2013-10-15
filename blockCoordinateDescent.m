@@ -39,7 +39,7 @@ function [x, multiplier] = blockCoordinateDescent(c, mm, a, lambda)
         target = bisectionTarget(multiplier, theta, lambda, mm, c);
       end
     end
-    x = inv(mm + (lambda * theta / 2 + multiplier) * eye(size(mm))) * c;
+    x = (mm + (lambda * theta / 2 + multiplier) * eye(size(mm))) \ c;
   end
   return
 
@@ -48,5 +48,5 @@ function rho = spectralRadius(A)
   return
 
 function r = bisectionTarget(multiplier, theta, lambda, mm, c)
-  r = theta * norm(inv(mm + (lambda * theta / 2 + multiplier) * eye(size(mm))) * c);
+  r = theta * norm((mm + (lambda * theta / 2 + multiplier) * eye(size(mm))) \ c);
   return

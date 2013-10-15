@@ -11,7 +11,8 @@ function [U, W, R] = updateWMMSEVariables(K, Q, M, I, N, H, V)
         h = H(rowOffset + 1 : rowOffset + N, colOffset + 1 : colOffset + Q * M);
         rowOffset = (k1 - 1) * Q * M;
         v = V(rowOffset + 1 : rowOffset + Q * M, :);
-        C = C + h * v * v' * h';
+        hv = h * v;
+        C = C + hv * hv';
       end
       C = C + eye(N);
       rowOffset = (k - 1) * I * N + (i - 1) * N;

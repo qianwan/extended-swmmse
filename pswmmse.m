@@ -2,14 +2,14 @@ clear;
 K = 4;
 M = 4;
 N = 2;
-Q = 5;
-I = 10;
+Q = 20;
+I = 40;
 SNRdB = 0;
 SNR = 10^(SNRdB / 10);
 P = SNR / Q;
 clusterLocations = zeros(1, K);
 if K == 1
-  clusterLocations = [0 + 0j];
+  clusterLocations = 0 + 0j;
 elseif K == 4
   clusterLocations = [0 + 0j, ...
                       0 + 2000j, ...
@@ -20,10 +20,10 @@ closures = findClusterClosures(clusterLocations, 2100);
 L = ones(K * I, 1) * 0.3;
 [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, 2000 / sqrt(3));
 
-numCases = 100;
+numCases = 1;
 totalSumRate = 0;
 totalNumIterations = 0;
-maxIterations = 1;
+maxIterations = 10;
 epsilon = 1e-1;
 for i = 1 : numCases
   numIterations = 0;
@@ -41,8 +41,10 @@ for i = 1 : numCases
     end
     mmse = updatePSWMmseMatrix(K, Q, M, I, N, H, U, W);
     [V, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H, V, U, W, L);
+    fprintf(2, 'update varaibles\n');
     [U, W, R] = updatePSWMmseVariables(K, Q, M, I, N, H, V);
-    A = updatePowerAllocation(K, Q, I, P, A, S, closures, 0.1);
+    fprintf(2, 'update power allocation\n');
+    A = updatePowerAllocation(K, Q, I, P, A, S, closures, (sum(R) - prev) * 0.1);
     fprintf(2, '  Sum rate @#%d in case#%d: %f\n', numIterations, i , sum(R));
   end
   fprintf(2, '->Case #%d: R = %f # = %d\n', i, sum(R), numIterations);

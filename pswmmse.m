@@ -21,11 +21,11 @@ closures = findClusterClosures(clusterLocations, r * 1.1);
 L = ones(K * I, 1) * 0.3;
 [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
 
-numCases = 1;
+numCases = 100;
 totalSumRate = 0;
 totalNumIterations = 0;
 totalNumServingBSs = 0;
-maxIterations = 4;
+maxIterations = 1e6;
 epsilon = 1e-1;
 reserve = 0;
 for i = 1 : numCases
@@ -48,8 +48,9 @@ for i = 1 : numCases
     [V, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H, V, U, W, L);
     [U, W, rR] = updatePSWMmseVariables(K, Q, M, I, N, H, V);
     fprintf(2, '  Sum rate @#%d in case#%d: %f\n', numIterations, i , sum(rR));
-    if sum(rR - prev) <= 0
+    if sum(rR - prev) < epsilon
       R = prev;
+      numIterations = numIterations - 1;
       break;
     end
     [A, V] = updatePowerAllocation(K, Q, M, I, P, A, S, closures, V, (sum(rR - prev)) * 0.01, reserve);

@@ -30,7 +30,7 @@ function converged = checkSubproblemConverged(K, Q, M, I, A, C, L, S, X, closure
               return
             end
             sub = lambda * x / norm(x) + 2 * (multiplier * x + mm * x - c);
-            if norm(sub, 2) > 1e-5
+            if norm(sub, 2) > 1e-4
               converged = false;
               return
             end

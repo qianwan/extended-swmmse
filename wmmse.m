@@ -4,10 +4,10 @@ M = 4;
 N = 2;
 Q = 5;
 I = 10;
-SNRdB = 15;
+SNRdB = 0;
 SNR = 10^(SNRdB / 10);
-r = 1000;
 P = SNR / Q;
+r = 1000;
 clusterLocations = [0 + 0j, ...
                     0 + r * 1j, ...
                     r * cos(pi / 6) + r * sin(pi / 6) * 1j, ...

@@ -5,9 +5,13 @@ function [X, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H,
   maxCount = 50;
   while true
     count = count + 1;
-    fprintf(2, '%d ', count);
     if count > maxCount
       break;
+    end
+    if mod(count, 10) == 0
+      fprintf(2, '%02d\n', count);
+    else
+      fprintf(2, '%d ', count);
     end
     C = updateCVectors(K, Q, M, I, N, closures, mmse, H, X, U, W);
     if checkSubproblemConverged(K, Q, M, I, A, C, L, S, X, closures, mmse)

@@ -1,5 +1,6 @@
-function An = updatePowerAllocation(K, Q, I, P, A, S, closures, delta)
+function [An, X] = updatePowerAllocation(K, Q, M, I, P, A, S, closures, V, delta, epsilon)
   An = A;
+  X = V;
   for l = 1 : K
     for q = 1 : Q
       sub = -S((l - 1) * Q + q, :);
@@ -21,12 +22,12 @@ function An = updatePowerAllocation(K, Q, I, P, A, S, closures, delta)
       relaxL = 0;
       relaxH = 100;
       relax = (relaxL + relaxH) / 2;
-      epsilon = 1e-6;
       proj = waterFilling(K, I, closures(l, :), direc, relax, epsilon);
-      if (sum(waterFilling(K, I, closures(l, :), direc, relaxH, epsilon)) > P) && (sum(waterFilling(K, I, closures(l, :), direc, relaxL, epsilon)) > P)
+      if (sum(waterFilling(K, I, closures(l, :), direc, relaxH, epsilon)) > P) ...
+        && (sum(waterFilling(K, I, closures(l, :), direc, relaxL, epsilon)) > P)
         fprintf(2, 'Stuck hereA\n');
       end
-      while abs(sum(proj) - P) > 1e-5
+      while abs(sum(proj) - P) > 1e-6
         if sum(proj) > P
           relaxL = relax;
         elseif sum(proj) < P
@@ -38,6 +39,22 @@ function An = updatePowerAllocation(K, Q, I, P, A, S, closures, delta)
         proj = waterFilling(K, I, closures(l, :), direc, relax, epsilon);
       end
       An((l - 1) * Q + q, :) = proj;
+      for k = closures(l, :)
+        if k == 0
+          continue;
+        end
+        for i = 1 : I
+          rowOffset = (l - 1) * Q * M + (q - 1) * M;
+          v = V(rowOffset + 1 : rowOffset + M, (k - 1) * I + i);
+          a = An((l - 1) * Q + q, (k - 1) * I + i);
+          if norm(v, 2) == 0
+            v = randn(M, 1) + randn(M, 1) * 1j;
+            X(rowOffset + 1 : rowOffset + M, (k - 1) * I + i) = v / norm(v, 2) * sqrt(a);
+          else
+            X(rowOffset + 1 : rowOffset + M, (k - 1) * I + i) = v / norm(v, 2) * sqrt(a);
+          end
+        end
+      end
     end
   end
   return

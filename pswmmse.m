@@ -53,16 +53,16 @@ for i = 1 : numCases
       numIterations = numIterations - 1;
       break;
     end
-    [A, V] = updatePowerAllocation(K, Q, M, I, P, A, S, closures, V, (sum(rR - prev)) * 0.01, reserve);
+    [A, V] = updatePowerAllocation(K, Q, M, I, P, A, S, closures, V, (sum(rR - prev)) * 0.008, reserve);
     [U, W, R] = updatePSWMmseVariables(K, Q, M, I, N, H, V);
   end
+  totalSumRate = totalSumRate + sum(R);
+  totalNumIterations = totalNumIterations + numIterations;
+  totalNumServingBSs = totalNumServingBSs + nnz(A - reserve);
   fprintf(2, '->Case #%d: R = %f # = %d\n', i, sum(R), numIterations);
   fprintf(2, '=>Current avg sum rate: %f\n', totalSumRate / i);
   fprintf(2, '=>Current avg number of iterations: %f\n', totalNumIterations / i);
   fprintf(2, '=>Current avg number of serving BSs per user: %f\n', totalNumServingBSs / i / K / I);
-  totalSumRate = totalSumRate + sum(R);
-  totalNumIterations = totalNumIterations + numIterations;
-  totalNumServingBSs = totalNumServingBSs + nnz(A - reserve);
 end
 fprintf(2, 'Avg sum rate: %f\n', totalSumRate / numCases);
 fprintf(2, 'Avg number of iterations: %f\n', totalNumIterations / numCases);

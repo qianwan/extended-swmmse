@@ -57,6 +57,9 @@ for i = 1 : numCases
     [U, W, R] = updatePSWMmseVariables(K, Q, M, I, N, H, V);
   end
   fprintf(2, '->Case #%d: R = %f # = %d\n', i, sum(R), numIterations);
+  fprintf(2, '=>Current avg sum rate: %f\n', totalSumRate / i);
+  fprintf(2, '=>Current avg number of iterations: %f\n', totalNumIterations / i);
+  fprintf(2, '=>Current avg number of serving BSs per user: %f\n', totalNumServingBSs / i / K / I);
   totalSumRate = totalSumRate + sum(R);
   totalNumIterations = totalNumIterations + numIterations;
   totalNumServingBSs = totalNumServingBSs + nnz(A - reserve);

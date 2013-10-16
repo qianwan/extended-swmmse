@@ -18,7 +18,7 @@ elseif K == 4
                       -r * cos(pi / 6) + r * sin(pi / 6) * 1j];
 end
 closures = findClusterClosures(clusterLocations, r * 1.1);
-L = ones(K * I, 1) * 0.3;
+L = ones(K * I, 1) * 0.5;
 [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
 
 numCases = 100;
@@ -27,7 +27,7 @@ totalNumIterations = 0;
 totalNumServingBSs = 0;
 maxIterations = 1e6;
 epsilon = 1e-1;
-reserve = 0;
+reserve = 1e-6;
 for i = 1 : numCases
   numIterations = 0;
   prev = 0;
@@ -36,6 +36,7 @@ for i = 1 : numCases
   [V, A] = generateRandomTxVector(K, Q, M, I, P, closures);
   [U, W, rR] = updatePSWMmseVariables(K, Q, M, I, N, H, V);
   R = rR;
+  numServgingBSs = 0;
   while abs(sum(prev - rR)) > epsilon
     prev = rR;
     numIterations = numIterations + 1;
@@ -47,18 +48,19 @@ for i = 1 : numCases
     mmse = updatePSWMmseMatrix(K, Q, M, I, N, H, U, W);
     [V, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H, V, U, W, L);
     [U, W, rR] = updatePSWMmseVariables(K, Q, M, I, N, H, V);
-    fprintf(2, '  Sum rate @#%d in case#%d: %f\n', numIterations, i , sum(rR));
+    numServgingBSs = getNumServingBSs(K, Q, M, I, V, reserve * 1.05);
+    fprintf(2, '  %d.%d Sum rate %f, serv BSs %f\n', i, numIterations, sum(rR), numServgingBSs / I / K);
     if sum(rR - prev) < epsilon
       R = prev;
       numIterations = numIterations - 1;
       break;
     end
-    [A, V] = updatePowerAllocation(K, Q, M, I, P, A, S, closures, V, (sum(rR - prev)) * 0.008, reserve);
+    [A, V] = updatePowerAllocation(K, Q, M, I, P, A, S, closures, V, (sum(rR - prev)) * 0.01, reserve);
     [U, W, R] = updatePSWMmseVariables(K, Q, M, I, N, H, V);
   end
   totalSumRate = totalSumRate + sum(R);
   totalNumIterations = totalNumIterations + numIterations;
-  totalNumServingBSs = totalNumServingBSs + nnz(A - reserve);
+  totalNumServingBSs = totalNumServingBSs + numServgingBSs;
   fprintf(2, '->Case #%d: R = %f # = %d\n', i, sum(R), numIterations);
   fprintf(2, '=>Current avg sum rate: %f\n', totalSumRate / i);
   fprintf(2, '=>Current avg number of iterations: %f\n', totalNumIterations / i);

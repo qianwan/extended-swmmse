@@ -15,7 +15,7 @@ function converged = checkSubproblemConverged(K, Q, M, I, A, C, L, S, X, closure
           colOffset = (k - 1) * I + i;
           x = X(rowOffset + 1 : rowOffset + M, colOffset);
           a = A((l - 1) * Q + q, (k - 1) * I + i);
-          if norm(c, 2) <= lambda / 2 || a < reserve
+          if norm(c, 2) <= lambda / 2 || a <= 1.001 * reserve
             if norm(x, 2) ~= 0
               converged = false;
               return

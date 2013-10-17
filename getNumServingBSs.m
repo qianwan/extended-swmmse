@@ -7,7 +7,7 @@ function n = getNumServingBSs(K, Q, M, I, V, reserve)
           rowOffset = (l - 1) * Q * M + (q - 1) * M;
           colOffset = (k - 1) * I + i;
           v = V(rowOffset + 1 : rowOffset + M, colOffset);
-          if dot(v, v) > reserve
+          if dot(v, v) > 1.001 * reserve
             n = n + 1;
           end
         end

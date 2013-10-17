@@ -1,6 +1,6 @@
 function [x, multiplier] = blockCoordinateDescent(c, mm, a, lambda, reserve)
   M = size(mm, 1);
-  if norm(c, 2) <= lambda / 2 || a < reserve
+  if norm(c, 2) <= lambda / 2 || a <= 1.001 * reserve
     x = zeros(M, 1);
     multiplier = 0;
   else

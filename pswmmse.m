@@ -18,7 +18,7 @@ elseif K == 4
                       -r * cos(pi / 6) + r * sin(pi / 6) * 1j];
 end
 closures = findClusterClosures(clusterLocations, r * 1.1);
-L = ones(K * I, 1) * 0.5;
+L = ones(K * I, 1) * 1;
 [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
 
 numCases = 100;
@@ -46,16 +46,16 @@ for i = 1 : numCases
       break;
     end
     mmse = updatePSWMmseMatrix(K, Q, M, I, N, H, U, W);
-    [V, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H, V, U, W, L);
+    [V, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H, V, U, W, L, reserve);
     [U, W, rR] = updatePSWMmseVariables(K, Q, M, I, N, H, V);
-    numServgingBSs = getNumServingBSs(K, Q, M, I, V, reserve * 1.05);
+    numServgingBSs = getNumServingBSs(K, Q, M, I, V, reserve);
     fprintf(2, '  %d.%d Sum rate %f, serv BSs %f\n', i, numIterations, sum(rR), numServgingBSs / I / K);
     if sum(rR - prev) < epsilon
       R = prev;
       numIterations = numIterations - 1;
       break;
     end
-    [A, V] = updatePowerAllocation(K, Q, M, I, P, A, S, closures, V, (sum(rR - prev)) * 0.01, reserve);
+    [A, V] = updatePowerAllocation(K, Q, M, I, P, A, S, closures, V, (sum(rR - prev)) * 0.02, reserve);
     [U, W, R] = updatePSWMmseVariables(K, Q, M, I, N, H, V);
   end
   totalSumRate = totalSumRate + sum(R);

@@ -1,7 +1,6 @@
-
-function [x, multiplier] = blockCoordinateDescent(c, mm, a, lambda)
+function [x, multiplier] = blockCoordinateDescent(c, mm, a, lambda, reserve)
   M = size(mm, 1);
-  if norm(c, 2) <= lambda / 2 || a <= 1e-6
+  if norm(c, 2) <= lambda / 2 || a < reserve
     x = zeros(M, 1);
     multiplier = 0;
   else
@@ -14,7 +13,7 @@ function [x, multiplier] = blockCoordinateDescent(c, mm, a, lambda)
       multiplier = (miuLow + miuHigh) / 2;
       theta = 1 / sqrt(a);
       target = bisectionTarget(multiplier, theta, lambda, mm, c);
-      while abs(target - 1) > 1e-6
+      while abs(target - 1) > 1e-4
         if target > 1
           miuLow = multiplier;
         elseif target < 1
@@ -29,7 +28,7 @@ function [x, multiplier] = blockCoordinateDescent(c, mm, a, lambda)
       multiplier = 0;
       theta = (tLow + tHigh) / 2;
       target = bisectionTarget(multiplier, theta, lambda, mm, c);
-      while abs(target - 1) > 1e-6
+      while abs(target - 1) > 1e-4
         if target > 1
           tHigh = theta;
         elseif target < 1

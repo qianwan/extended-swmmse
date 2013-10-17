@@ -1,5 +1,4 @@
-
-function converged = checkSubproblemConverged(K, Q, M, I, A, C, L, S, X, closures, mmse)
+function converged = checkSubproblemConverged(K, Q, M, I, A, C, L, S, X, closures, mmse, reserve)
   converged = true;
   for l = 1 : K
     for q = 1 : Q
@@ -15,7 +14,8 @@ function converged = checkSubproblemConverged(K, Q, M, I, A, C, L, S, X, closure
           rowOffset = (l - 1) * Q * M + (q - 1) * M;
           colOffset = (k - 1) * I + i;
           x = X(rowOffset + 1 : rowOffset + M, colOffset);
-          if norm(c, 2) <= lambda / 2
+          a = A((l - 1) * Q + q, (k - 1) * I + i);
+          if norm(c, 2) <= lambda / 2 || a < reserve
             if norm(x, 2) ~= 0
               converged = false;
               return
@@ -24,13 +24,12 @@ function converged = checkSubproblemConverged(K, Q, M, I, A, C, L, S, X, closure
             multiplier = S((l - 1) * Q + q, (k - 1) * I + i);
             offset = (l - 1) * Q * M + (q - 1) * M;
             mm = mmse(offset + 1 : offset + M, offset + 1 : offset + M);
-            a = A((l - 1) * Q + q, (k - 1) * I + i);
-            if abs(multiplier * (a - norm(x, 2)^2)) > 1e-6
+            if abs(multiplier * (a - norm(x, 2)^2)) > 1e-3
               converged = false;
               return
             end
-            sub = lambda * x / norm(x) + 2 * (multiplier * x + mm * x - c);
-            if norm(sub, 2) > 1e-4
+            rep = -2 * norm(x, 2) / lambda * (multiplier * x + mm * x - c);
+            if norm(rep - x, 2)^2 > (0.01 * norm(x, 2)^2)
               converged = false;
               return
             end

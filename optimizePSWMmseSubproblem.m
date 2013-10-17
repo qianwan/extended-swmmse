@@ -1,8 +1,8 @@
-function [X, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H, V, U, W, L)
+function [X, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H, V, U, W, L, reserve)
   X = V;
   S = zeros(K * Q, K * I);
   count = 0;
-  maxCount = 50;
+  maxCount = 70;
   while true
     count = count + 1;
     if count > maxCount
@@ -10,7 +10,7 @@ function [X, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H,
     end
     fprintf(2, '.');
     C = updateCVectors(K, Q, M, I, N, closures, mmse, H, X, U, W);
-    if checkSubproblemConverged(K, Q, M, I, A, C, L, S, X, closures, mmse)
+    if checkSubproblemConverged(K, Q, M, I, A, C, L, S, X, closures, mmse, reserve)
       break;
     end
     for k = 1 : K
@@ -27,7 +27,7 @@ function [X, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H,
             mm = mmse(offset + 1 : offset + M, offset + 1 : offset + M);
             a = A((l - 1) * Q + q, (k - 1) * I + i);
             lambda = L((k - 1) * I + i);
-            [x, multiplier] = blockCoordinateDescent(c, mm, a, lambda);
+            [x, multiplier] = blockCoordinateDescent(c, mm, a, lambda, reserve);
             rowOffset = (l - 1) * Q * M + (q - 1) * M;
             colOffset = (k - 1) * I + i;
             X(rowOffset + 1 : rowOffset + M, colOffset) = x;

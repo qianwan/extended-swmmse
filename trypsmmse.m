@@ -21,7 +21,7 @@ closures = findClusterClosures(clusterLocations, r * 1.1);
 L = ones(K * I, 1) * 0.5;
 [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
 
-numCases = 50;
+numCases = 1;
 totalSumRate = 0;
 totalNumIterations = 0;
 totalNumServingBSs = 0;
@@ -31,9 +31,7 @@ reserve = 1e-7;
 for i = 1 : numCases
   numIterations = 0;
   prev = 0;
-  [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
-  H = generateMIMOChannel(K, Q, M, bsLocations, I, N, ueLocations, 2);
-  [V, A] = generateRandomTxVector(K, Q, M, I, P, closures);
+  load 't.mat'
   [U, W, rR] = updatePSWMmseVariables(K, Q, M, I, N, H, V);
   R = rR;
   numServgingBSs = 0;
@@ -46,7 +44,8 @@ for i = 1 : numCases
       break;
     end
     mmse = updatePSWMmseMatrix(K, Q, M, I, N, H, U, W);
-    [V, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H, V, U, W, L, reserve);
+    [X, S] = optimizePSWMmseSubproblem(K, Q, M, I, N, A, closures, mmse, H, V, U, W, L, reserve);
+    V = X;
     [U, W, rR] = updatePSWMmseVariables(K, Q, M, I, N, H, V);
     numServgingBSs = getNumServingBSs(K, Q, M, I, V, reserve);
     fprintf(2, '  %d.%d Sum rate %f, serv BSs %f\n', i, numIterations, sum(rR), numServgingBSs / I / K);
@@ -55,7 +54,9 @@ for i = 1 : numCases
       numIterations = numIterations - 1;
       break;
     end
-    [A, V] = updatePowerAllocation(K, Q, M, I, P, A, S, closures, V, (sum(rR - prev)) * 0.025, reserve);
+    [An, X] = updatePowerAllocation(K, Q, M, I, P, A, S, closures, V, (sum(rR - prev)) * 0.025, reserve);
+    A = An;
+    V = X;
     [U, W, R] = updatePSWMmseVariables(K, Q, M, I, N, H, V);
   end
   totalSumRate = totalSumRate + sum(R);

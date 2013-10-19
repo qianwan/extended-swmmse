@@ -23,10 +23,6 @@ function [An, X] = updatePowerAllocation(K, Q, M, I, P, A, S, closures, V, delta
       relaxH = 100;
       relax = (relaxL + relaxH) / 2;
       proj = waterFilling(K, I, closures(l, :), direc, relax, epsilon);
-      if (sum(waterFilling(K, I, closures(l, :), direc, relaxH, epsilon)) > P) ...
-        && (sum(waterFilling(K, I, closures(l, :), direc, relaxL, epsilon)) > P)
-        fprintf(2, 'Stuck hereA\n');
-      end
       while abs(sum(proj) - P) > 1e-6
         if sum(proj) > P
           relaxL = relax;

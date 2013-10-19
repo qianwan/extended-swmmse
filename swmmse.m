@@ -8,7 +8,7 @@ SNRdB = 5;
 SNR = 10^(SNRdB / 10);
 P = SNR / Q;
 clusterLocations = zeros(1, K);
-r = 2000;
+r = 1000;
 if K == 1
   clusterLocations = 0 + 0j;
 elseif K == 4
@@ -18,8 +18,8 @@ elseif K == 4
                       -r * cos(pi / 6) + r * sin(pi / 6) * 1j];
 end
 closures = findClusterClosures(clusterLocations, r * 0.9);
-L = ones(K, 1) * Q * K / I / sqrt(SNR);
-%L = ones(K, 1) * 1;
+%L = ones(K, 1) * Q * K / I / sqrt(SNR);
+L = ones(K, 1) * 0.5;
 [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
 
 numCases = 50;
@@ -47,7 +47,7 @@ for i = 1 : numCases
       break;
     end
     [J, D] = updateSWMmseMatrix(K, Q, M, I, N, H, U, W);
-    V = optimizeSWMmse(K, Q, M, I, N, J, D, V, U, W, L, P);
+    V = optimizeSWMmse(K, Q, M, I, J, D, V, L, P);
     [U, W, rR] = updateSWMmseVariables(K, Q, M, I, N, H, V);
     numServgingBSs = getNumServingBSs(K, Q, M, I, V, reserve);
     fprintf(2, '  %d.%d Sum rate %f, serv BSs %f\n', i, numIterations, sum(rR), numServgingBSs / I / K);

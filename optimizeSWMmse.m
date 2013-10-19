@@ -1,4 +1,4 @@
-function X = optimizeSWMmse(K, Q, M, I, N, J, D, V, U, W, L, P)
+function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
     X = V;
     count = 0;
     maxCount = 100;
@@ -15,7 +15,7 @@ function X = optimizeSWMmse(K, Q, M, I, N, J, D, V, U, W, L, P)
         for k = 1 : K
             lambda = L(k);
             for q = 1 : Q
-                [C, A] = cvector(K, Q, M, I, N, D, J, X, lambda, k, q);
+                [C, A] = cvector(Q, M, I, D, J, X, lambda, k, q);
                 for i = 1 : I
                     if A(i) == 0
                         rowOffset = (k - 1) * Q * M + (q - 1) * M;
@@ -28,7 +28,7 @@ function X = optimizeSWMmse(K, Q, M, I, N, J, D, V, U, W, L, P)
                     continue;
                 end
                 miuLow = 0;
-                miuHigh = upperBoundOfMiu(Q, M, I, P, A, C, k, q);
+                miuHigh = upperBoundOfMiu(I, P, A, C);
                 miu = (miuLow + miuHigh) / 2;
                 deltaLow = zeros(I, 1);
                 deltaHigh = zeros(I, 1); % upperBoundOfDelta(Q, M, A, C, J, I, k, q, lambda, miuHigh);
@@ -52,7 +52,7 @@ function X = optimizeSWMmse(K, Q, M, I, N, J, D, V, U, W, L, P)
                             elseif target > 1
                                 deltaHigh(i) = delta(i);
                             end
-                            if abs((deltaLow(i) - deltaHigh(i)) / deltaHigh) < 1e-3
+                            if abs(deltaLow(i) - deltaHigh(i)) < 1e-3
                                 break;
                             end
                         end
@@ -112,7 +112,7 @@ function y = checkSWMmseConverged(K, Q, M, I, T, P, V)
     end
     return
 
-function [C, A] = cvector(K, Q, M, I, N, D, J, V, lambda, k, q)
+function [C, A] = cvector(Q, M, I, D, J, V, lambda, k, q)
     C = zeros(M, I);
     for i = 1 : I
         rowOffset = (q - 1) * M;
@@ -142,7 +142,7 @@ function [C, A] = cvector(K, Q, M, I, N, D, J, V, lambda, k, q)
     end
     return
 
-function miuHigh = upperBoundOfMiu(Q, M, I, P, A, C, k, q)
+function miuHigh = upperBoundOfMiu(I, P, A, C)
     maxc = 0;
     for i = 1 : I
         if A(i) == 0

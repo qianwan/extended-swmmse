@@ -1,19 +1,10 @@
 function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
     X = V;
-    count = 0;
-    maxCount = 100;
-    while true
-        count = count + 1;
-        if count > maxCount
-            break;
-        end
-        fprintf(2, '.');
-        if mod(count, 50) == 0
-            fprintf(2, '\n');
-        end
-        T = zeros(K, Q);
-        for k = 1 : K
-            lambda = L(k);
+    for k = 1 : K
+        lambda = L(k);
+        while true
+            fprintf(2, '%d', k);
+            T = zeros(Q, 1);
             for q = 1 : Q
                 [C, A] = cvector(Q, M, I, D, J, X, lambda, k, q);
                 for i = 1 : I
@@ -24,21 +15,24 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                     end
                 end
                 if nnz(A) == 0
-                    T(k, q) = 0;
+                    T(q) = 0;
                     continue;
                 end
+                rowOffset = (k - 1) * Q * M + (q - 1) * M;
+                colOffset = (q - 1) * M;
+                Jkq = J(rowOffset + 1 : rowOffset + M, colOffset + 1 : colOffset + M);
+                rho = spectralRadius(Jkq);
                 miuLow = 0;
                 miuHigh = upperBoundOfMiu(I, P, A, C);
                 miu = (miuLow + miuHigh) / 2;
-                deltaLow = zeros(I, 1);
-                deltaHigh = zeros(I, 1); % upperBoundOfDelta(Q, M, A, C, J, I, k, q, lambda, miuHigh);
                 delta = zeros(I, 1); % (deltaLow + deltaHigh) / 2;
                 rowOffset = (k - 1) * Q * M + (q - 1) * M;
                 colOffset = (q - 1) * M;
                 Jkq = J(rowOffset + 1 : rowOffset + M, colOffset + 1 : colOffset + M);
                 while true
                     miu = (miuLow + miuHigh) / 2;
-                    deltaHigh = upperBoundOfDelta(Q, M, A, C, J, I, k, q, lambda, miuHigh);
+                    deltaLow = zeros(I, 1);
+                    deltaHigh = upperBoundOfDelta(A, C, I, rho, lambda, miuHigh);
                     for i = 1 : I
                         if A(i) == 0
                             continue;
@@ -51,6 +45,8 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                                 deltaLow(i) = delta(i);
                             elseif target > 1
                                 deltaHigh(i) = delta(i);
+                            else
+                                break;
                             end
                             if abs(deltaLow(i) - deltaHigh(i)) < 1e-3
                                 break;
@@ -68,6 +64,8 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                         miuHigh = miu;
                     elseif power > P
                         miuLow = miu;
+                    else
+                        break;
                     end
                     if abs(miuLow - miuHigh) < 1e-3
                         break;
@@ -83,36 +81,37 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                     colOffset = (k - 1) * I + i;
                     X(rowOffset + 1 : rowOffset + M, colOffset) = v;
                 end
-                T(k, q) = miu;
+                T(q) = miu;
             end
-        end
-        if checkSWMmseConverged(K, Q, M, I, T, P, X)
-            break;
+            if checkSWMmseConverged(Q, M, I, T, P, X, k) == true
+                break;
+            end
         end
     end
     return
 
-function y = checkSWMmseConverged(K, Q, M, I, T, P, V)
+function y = checkSWMmseConverged(Q, M, I, T, P, V, k)
     y = true;
-    for k = 1 : K
-        for q = 1 : Q
-            miu = T(k, q);
-            power = 0;
-            for i = 1 : I
-                rowOffset = (k - 1) * Q * M + (q - 1) * M;
-                colOffset = (k - 1) * I + i;
-                v = V(rowOffset + 1 : rowOffset + M, colOffset);
-                power = power + dot(v, v);
-            end
-            if abs(miu * (P - power)) > 1e-4
-                y = false;
-                return
-            end
+    for q = 1 : Q
+        miu = T(q);
+        if miu == 0
+            continue;
+        end
+        power = 0;
+        for i = 1 : I
+            rowOffset = (k - 1) * Q * M + (q - 1) * M;
+            colOffset = (k - 1) * I + i;
+            v = V(rowOffset + 1 : rowOffset + M, colOffset);
+            power = power + dot(v, v);
+        end
+        if abs(miu * (P - power)) > 1e-3
+            y = false;
+            return
         end
     end
     return
 
-function [C, A] = cvector(Q, M, I, D, J, V, lambda, k, q)
+function [C, A] = cvector(Q, M, I, D, J, X, lambda, k, q)
     C = zeros(M, I);
     for i = 1 : I
         rowOffset = (q - 1) * M;
@@ -128,12 +127,12 @@ function [C, A] = cvector(Q, M, I, D, J, V, lambda, k, q)
             Jkp = J(rowOffset + 1 : rowOffset + M, colOffset + 1 : colOffset + M);
             rowOffset = (k - 1) * Q * M + (p - 1) * M;
             colOffset = (k - 1) * I + i;
-            v = V(rowOffset + 1 : rowOffset + M, colOffset);
+            v = X(rowOffset + 1 : rowOffset + M, colOffset);
             c = c - Jkp * v;
         end
         C(:, i) = c;
     end
-    A = zeros(1, I);
+    A = zeros(I, 1);
     for i = 1 : I
         c = C(:, i);
         if norm(c, 2) > lambda / 2
@@ -153,20 +152,16 @@ function miuHigh = upperBoundOfMiu(I, P, A, C)
             maxc = norm(c);
         end
     end
-    miuHigh = (P / nnz(A))^(-0.5) * maxc;
+    miuHigh = (P / nnz(A))^(-0.5) * maxc * 1.0;
     return
 
-function deltaHigh = upperBoundOfDelta(Q, M, A, C, J, I, k, q, lambda, miuHigh)
+function deltaHigh = upperBoundOfDelta(A, C, I, rho, lambda, miuHigh)
     deltaHigh = zeros(I, 1);
-    rowOffset = (k - 1) * Q * M + (q - 1) * M;
-    colOffset = (q - 1) * M;
-    Jkq = J(rowOffset + 1 : rowOffset + M, colOffset + 1 : colOffset + M);
-    rho = spectralRadius(Jkq);
     for i = 1 : I
         if A(i) == 0
             continue;
         end
-        deltaHigh(i) = (rho + miuHigh) / (norm(C(:, i)) - lambda / 2);
+        deltaHigh(i) = (rho + miuHigh) / (norm(C(:, i)) - lambda / 2) * 1.0;
     end
     return
 

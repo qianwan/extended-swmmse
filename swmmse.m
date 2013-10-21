@@ -8,7 +8,7 @@ SNRdB = 5;
 SNR = 10^(SNRdB / 10);
 P = SNR / Q;
 clusterLocations = zeros(1, K);
-r = 1000;
+r = 2000;
 if K == 1
     clusterLocations = 0 + 0j;
 elseif K == 4

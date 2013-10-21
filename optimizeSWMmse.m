@@ -3,11 +3,12 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
     for k = 1 : K
         lambda = L(k);
         while true
+            % fprintf(2, '%d', k);
             T = zeros(Q, 1);
             offset = (k - 1) * Q * M;
             V(offset + 1 : offset + Q * M, :) = X(offset + 1 : offset + Q * M, :);
             for q = 1 : Q
-                [C, A] = cvector(Q, M, I, D, J, V, lambda, k, q);
+                [C, A] = cvector(Q, M, I, D, J, X, lambda, k, q);
                 for i = 1 : I
                     if A(i) == 0
                         rowOffset = (k - 1) * Q * M + (q - 1) * M;
@@ -38,16 +39,15 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                         if A(i) == 0
                             continue;
                         end
-                        c = C(:, i);
                         while true
                             delta(i) = (deltaLow(i) + deltaHigh(i)) / 2;
-                            target = bisectionTarget(Jkq, c, delta(i), lambda, miu);
+                            target = bisectionTarget(Jkq, C(:, i), delta(i), lambda, miu);
                             if target < 1
                                 deltaLow(i) = delta(i);
                             else
                                 deltaHigh(i) = delta(i);
                             end
-                            if abs(deltaLow(i) - deltaHigh(i)) < 1e-3
+                            if abs(deltaLow(i) - deltaHigh(i)) / deltaHigh(i) < 1e-6
                                 break;
                             end
                         end
@@ -64,7 +64,7 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                     else
                         miuLow = miu;
                     end
-                    if abs(miuLow - miuHigh) < 1e-3
+                    if abs(miuLow - miuHigh) < 1e-6
                         break;
                     end
                 end
@@ -80,19 +80,43 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                 end
                 T(q) = miu;
             end
-            if checkSWMmseConverged(Q, M, I, T, P, X, k) == true
+            if checkSWMmseConverged(Q, M, I, T, P, X, D, J, k, lambda) == true
                 break;
             end
         end
+        % fprintf(2, '\n');
     end
     return
 
-function y = checkSWMmseConverged(Q, M, I, T, P, V, k)
+function y = checkSWMmseConverged(Q, M, I, T, P, V, D, J, k, lambda)
     y = true;
     for q = 1 : Q
         miu = T(q);
-        if miu == 0
-            continue;
+        [C, A] = cvector(Q, M, I, D, J, V, lambda, k, q);
+        rowOffset = (k - 1) * Q * M + (q - 1) * M;
+        colOffset = (q - 1) * M;
+        Jkq = J(rowOffset + 1 : rowOffset + M, colOffset + 1 : colOffset + M);
+        for i = 1 : I
+            rowOffset = (k - 1) * Q * M + (q - 1) * M;
+            colOffset = (k - 1) * I + i;
+            v = V(rowOffset + 1 : rowOffset + M, colOffset);
+            if norm(v) == 0
+                if norm(C(:, i)) <= lambda / 2
+                    continue;
+                else
+                    y = false;
+                    return;
+                end
+            else
+                delta = 1 / norm(v);
+                target = bisectionTarget(Jkq, C(:, i), delta, lambda, miu);
+                if abs(target - 1) < 1e-6
+                    continue;
+                else
+                    y = false;
+                    return;
+                end
+            end
         end
         power = 0;
         for i = 1 : I
@@ -101,7 +125,7 @@ function y = checkSWMmseConverged(Q, M, I, T, P, V, k)
             v = V(rowOffset + 1 : rowOffset + M, colOffset);
             power = power + dot(v, v);
         end
-        if abs(miu * (P - power)) > 1e-3
+        if abs(miu * (P - power)) > 1e-6
             y = false;
             return
         end
@@ -149,7 +173,7 @@ function miuHigh = upperBoundOfMiu(I, P, A, C)
             maxc = norm(c);
         end
     end
-    miuHigh = (P / nnz(A))^(-0.5) * maxc * 1.0;
+    miuHigh = (P / nnz(A))^(-0.5) * maxc * 1.1;
     return
 
 function deltaHigh = upperBoundOfDelta(A, C, I, rho, lambda, miuHigh)
@@ -158,7 +182,7 @@ function deltaHigh = upperBoundOfDelta(A, C, I, rho, lambda, miuHigh)
         if A(i) == 0
             continue;
         end
-        deltaHigh(i) = (rho + miuHigh) / (norm(C(:, i)) - lambda / 2) * 1.0;
+        deltaHigh(i) = (rho + miuHigh) / (norm(C(:, i)) - lambda / 2) * 1.1;
     end
     return
 

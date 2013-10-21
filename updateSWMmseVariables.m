@@ -38,9 +38,9 @@ function [U, W, R, obj] = updateSWMmseVariables(K, Q, M, I, N, H, V, L)
     for k = 1 : K
         lambda = L(k);
         for i = 1 : I
+            colOffset = (k - 1) * I + i;
             for q = 1 : Q
                 rowOffset = (k - 1) * Q * M + (q - 1) * M;
-                colOffset = (k - 1) * I + i;
                 v = V(rowOffset + 1 : rowOffset + M, colOffset);
                 obj = obj - lambda * norm(v, 2);
             end

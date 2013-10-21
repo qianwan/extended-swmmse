@@ -3,10 +3,11 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
     for k = 1 : K
         lambda = L(k);
         while true
-            fprintf(2, '%d', k);
             T = zeros(Q, 1);
+            offset = (k - 1) * Q * M;
+            V(offset + 1 : offset + Q * M, :) = X(offset + 1 : offset + Q * M, :);
             for q = 1 : Q
-                [C, A] = cvector(Q, M, I, D, J, X, lambda, k, q);
+                [C, A] = cvector(Q, M, I, D, J, V, lambda, k, q);
                 for i = 1 : I
                     if A(i) == 0
                         rowOffset = (k - 1) * Q * M + (q - 1) * M;
@@ -25,7 +26,7 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                 miuLow = 0;
                 miuHigh = upperBoundOfMiu(I, P, A, C);
                 miu = (miuLow + miuHigh) / 2;
-                delta = zeros(I, 1); % (deltaLow + deltaHigh) / 2;
+                delta = zeros(I, 1);
                 rowOffset = (k - 1) * Q * M + (q - 1) * M;
                 colOffset = (q - 1) * M;
                 Jkq = J(rowOffset + 1 : rowOffset + M, colOffset + 1 : colOffset + M);
@@ -43,10 +44,8 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                             target = bisectionTarget(Jkq, c, delta(i), lambda, miu);
                             if target < 1
                                 deltaLow(i) = delta(i);
-                            elseif target > 1
-                                deltaHigh(i) = delta(i);
                             else
-                                break;
+                                deltaHigh(i) = delta(i);
                             end
                             if abs(deltaLow(i) - deltaHigh(i)) < 1e-3
                                 break;
@@ -62,10 +61,8 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                     end
                     if power < P
                         miuHigh = miu;
-                    elseif power > P
-                        miuLow = miu;
                     else
-                        break;
+                        miuLow = miu;
                     end
                     if abs(miuLow - miuHigh) < 1e-3
                         break;
@@ -111,7 +108,7 @@ function y = checkSWMmseConverged(Q, M, I, T, P, V, k)
     end
     return
 
-function [C, A] = cvector(Q, M, I, D, J, X, lambda, k, q)
+function [C, A] = cvector(Q, M, I, D, J, V, lambda, k, q)
     C = zeros(M, I);
     for i = 1 : I
         rowOffset = (q - 1) * M;
@@ -127,7 +124,7 @@ function [C, A] = cvector(Q, M, I, D, J, X, lambda, k, q)
             Jkp = J(rowOffset + 1 : rowOffset + M, colOffset + 1 : colOffset + M);
             rowOffset = (k - 1) * Q * M + (p - 1) * M;
             colOffset = (k - 1) * I + i;
-            v = X(rowOffset + 1 : rowOffset + M, colOffset);
+            v = V(rowOffset + 1 : rowOffset + M, colOffset);
             c = c - Jkp * v;
         end
         C(:, i) = c;

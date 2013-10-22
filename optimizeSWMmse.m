@@ -47,7 +47,7 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                             else
                                 deltaHigh(i) = delta(i);
                             end
-                            if abs(deltaLow(i) - deltaHigh(i)) / deltaHigh(i) < 1e-6
+                            if abs(deltaLow(i) - deltaHigh(i)) < 1e-6
                                 break;
                             end
                         end

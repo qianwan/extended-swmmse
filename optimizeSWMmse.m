@@ -2,8 +2,16 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
     X = V;
     for k = 1 : K
         lambda = L(k);
+        count  = 0;
         while true
-            % fprintf(2, '%d', k);
+            fprintf(2, '%d', k);
+            count = count + 1;
+            if mod(count, 50) == 0
+                fprintf(2, '\n');
+            end
+            if count > 100
+                break;
+            end
             T = zeros(Q, 1);
             offset = (k - 1) * Q * M;
             V(offset + 1 : offset + Q * M, :) = X(offset + 1 : offset + Q * M, :);
@@ -28,9 +36,6 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                 miuHigh = upperBoundOfMiu(I, P, A, C);
                 miu = (miuLow + miuHigh) / 2;
                 delta = zeros(I, 1);
-                rowOffset = (k - 1) * Q * M + (q - 1) * M;
-                colOffset = (q - 1) * M;
-                Jkq = J(rowOffset + 1 : rowOffset + M, colOffset + 1 : colOffset + M);
                 while true
                     miu = (miuLow + miuHigh) / 2;
                     deltaLow = zeros(I, 1);
@@ -39,16 +44,21 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                         if A(i) == 0
                             continue;
                         end
+                        t1 = bisectionTarget(Jkq, C(:, i), deltaLow(i), lambda, miu);
+                        t2 = bisectionTarget(Jkq, C(:, i), deltaHigh(i), lambda, miu);
+                        if (t1 > 1 && t2 > 1) || (t1 < 1 && t2 < 1)
+                            fprintf(2, 'parameter selection error\n');
+                        end
                         while true
                             delta(i) = (deltaLow(i) + deltaHigh(i)) / 2;
                             target = bisectionTarget(Jkq, C(:, i), delta(i), lambda, miu);
+                            if abs(target - 1) < 1e-15
+                                break;
+                            end
                             if target < 1
                                 deltaLow(i) = delta(i);
                             else
                                 deltaHigh(i) = delta(i);
-                            end
-                            if abs(deltaLow(i) - deltaHigh(i)) < 1e-6
-                                break;
                             end
                         end
                     end
@@ -59,13 +69,13 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                         end
                         power = power + 1 / delta(i)^2;
                     end
+                    if abs(miuLow - miuHigh) < 1e-15
+                        break;
+                    end
                     if power < P
                         miuHigh = miu;
                     else
                         miuLow = miu;
-                    end
-                    if abs(miuLow - miuHigh) < 1e-6
-                        break;
                     end
                 end
                 for i = 1 : I
@@ -84,7 +94,7 @@ function X = optimizeSWMmse(K, Q, M, I, J, D, V, L, P)
                 break;
             end
         end
-        % fprintf(2, '\n');
+        fprintf(2, '\n');
     end
     return
 
@@ -110,7 +120,7 @@ function y = checkSWMmseConverged(Q, M, I, T, P, V, D, J, k, lambda)
             else
                 delta = 1 / norm(v);
                 target = bisectionTarget(Jkq, C(:, i), delta, lambda, miu);
-                if abs(target - 1) < 1e-6
+                if abs(target - 1) < 1e-14
                     continue;
                 else
                     y = false;
@@ -125,14 +135,16 @@ function y = checkSWMmseConverged(Q, M, I, T, P, V, D, J, k, lambda)
             v = V(rowOffset + 1 : rowOffset + M, colOffset);
             power = power + dot(v, v);
         end
-        if abs(miu * (P - power)) > 1e-6
+        if abs(miu) < 1e-14 || abs(P - power) < 1e-14
+            continue;
+        else
             y = false;
-            return
+            return;
         end
     end
     return
 
-function [C, A] = cvector(Q, M, I, D, J, V, lambda, k, q)
+function [C, A] = cvector(Q, M, I, D, J, X, lambda, k, q)
     C = zeros(M, I);
     for i = 1 : I
         rowOffset = (q - 1) * M;
@@ -148,7 +160,7 @@ function [C, A] = cvector(Q, M, I, D, J, V, lambda, k, q)
             Jkp = J(rowOffset + 1 : rowOffset + M, colOffset + 1 : colOffset + M);
             rowOffset = (k - 1) * Q * M + (p - 1) * M;
             colOffset = (k - 1) * I + i;
-            v = V(rowOffset + 1 : rowOffset + M, colOffset);
+            v = X(rowOffset + 1 : rowOffset + M, colOffset);
             c = c - Jkp * v;
         end
         C(:, i) = c;

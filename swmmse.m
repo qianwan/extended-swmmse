@@ -35,27 +35,24 @@ for i = 1 : numCases
     [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
     H = generateMIMOChannel(K, Q, M, bsLocations, I, N, ueLocations, 2);
     [V, A] = generateRandomTxVector(K, Q, M, I, P, closures);
-    [U, W, rR, obj] = updateSWMmseVariables(K, Q, M, I, N, H, V);
-    R = rR;
+    [U, W, R, obj] = updateSWMmseVariables(K, Q, M, I, N, H, V);
     numServgingBSs = 0;
     while abs(prev - obj) > epsilon
         prev = obj;
         numIterations = numIterations + 1;
         if numIterations > maxIterations
             numIterations = numIterations - 1;
-            R = rR;
             break;
         end
         [J, D] = updateSWMmseMatrix(K, Q, M, I, N, H, U, W);
         V = optimizeSWMmse(K, Q, M, I, J, D, V, L, P);
-        [U, W, rR, obj] = updateSWMmseVariables(K, Q, M, I, N, H, V);
+        [U, W, R, obj] = updateSWMmseVariables(K, Q, M, I, N, H, V);
         numServgingBSs = getNumServingBSs(K, Q, M, I, V, reserve);
-        fprintf(2, '  %d.%d Sum rate %f, serv BSs %f\n', i, numIterations, sum(rR), numServgingBSs / I / K);
         if obj - prev < epsilon
-            R = rR;
             numIterations = numIterations - 1;
             break;
         end
+        fprintf(2, '  %d.%d Sum rate %f, obj %f, serv BSs %f\n', i, numIterations, sum(R), obj, numServgingBSs / I / K);
     end
     totalSumRate = totalSumRate + sum(R);
     totalNumIterations = totalNumIterations + numIterations;

@@ -22,13 +22,13 @@ L = ones(K, 1) * Q * K / I / sqrt(SNR);
 %L = ones(K, 1) * 1;
 [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
 
-numCases = 50;
+numCases = 1;
 totalSumRate = 0;
 totalNumIterations = 0;
 totalNumServingBSs = 0;
 maxIterations = 1e6;
 epsilon = 1e-1;
-reserve = 0;
+reserve = 1e-6;
 for i = 1 : numCases
     numIterations = 0;
     prev = 0;
@@ -45,14 +45,17 @@ for i = 1 : numCases
             break;
         end
         [J, D] = updateSWMmseMatrix(K, Q, M, I, N, H, U, W);
-        V = optimizeSWMmse(K, Q, M, I, J, D, V, L, P);
+        %V = optimizeSWMmse(K, Q, M, I, J, D, V, L, P);
+        %V = optimizeSWMmseCvx(K, Q, M, I, J, D, V, L, P);
+        V = optimizeSWMmseFmincon(K, Q, M, I, J, D, V, L, P);
         [U, W, R, obj] = updateSWMmseVariables(K, Q, M, I, N, H, V);
         numServgingBSs = getNumServingBSs(K, Q, M, I, V, reserve);
         if obj - prev < epsilon
             numIterations = numIterations - 1;
             break;
         end
-        fprintf(2, '  %d.%d Sum rate %f, obj %f, serv BSs %f\n', i, numIterations, sum(R), obj, numServgingBSs / I / K);
+        fprintf(2, '  %d.%d Sum rate %f, obj %f, serv BSs %f\n', ...
+            i, numIterations, sum(R), obj, numServgingBSs / I / K);
     end
     totalSumRate = totalSumRate + sum(R);
     totalNumIterations = totalNumIterations + numIterations;

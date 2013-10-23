@@ -4,11 +4,11 @@ M = 4;
 N = 2;
 Q = 5;
 I = 10;
-SNRdB = 5;
+SNRdB = 0;
 SNR = 10^(SNRdB / 10);
 P = SNR / Q;
 clusterLocations = zeros(1, K);
-r = 2000;
+r = 1000;
 if K == 1
     clusterLocations = 0 + 0j;
 elseif K == 4
@@ -18,15 +18,16 @@ elseif K == 4
                         -r * cos(pi / 6) + r * sin(pi / 6) * 1j];
 end
 closures = findClusterClosures(clusterLocations, r * 0.9);
-L = ones(K, 1) * Q * K / I / sqrt(SNR);
-%L = ones(K, 1) * 1;
+%L = ones(K, 1) * Q * K / I / sqrt(SNR);
+L = ones(K, 1) * 1;
+method = 'bcd';
 [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
 
-numCases = 1;
+numCases = 50;
 totalSumRate = 0;
 totalNumIterations = 0;
 totalNumServingBSs = 0;
-maxIterations = 1e6;
+maxIterations = 10;
 epsilon = 1e-1;
 reserve = 1e-6;
 for i = 1 : numCases
@@ -45,9 +46,7 @@ for i = 1 : numCases
             break;
         end
         [J, D] = updateSWMmseMatrix(K, Q, M, I, N, H, U, W);
-        %V = optimizeSWMmse(K, Q, M, I, J, D, V, L, P);
-        %V = optimizeSWMmseCvx(K, Q, M, I, J, D, V, L, P);
-        V = optimizeSWMmseFmincon(K, Q, M, I, J, D, V, L, P);
+        V = optimizeSWMmse(K, Q, M, I, J, D, V, L, P, method);
         [U, W, R, obj] = updateSWMmseVariables(K, Q, M, I, N, H, V);
         numServgingBSs = getNumServingBSs(K, Q, M, I, V, reserve);
         if obj - prev < epsilon

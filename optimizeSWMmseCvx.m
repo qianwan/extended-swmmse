@@ -6,7 +6,9 @@ function X = optimizeSWMmseCvx(K, Q, M, I, J, D, V, L, P)
         offset = (k - 1) * I;
         d = D(:, offset + 1 : offset + I);
         lambda = L(k);
+        cvx_solver mosek;
         cvx_begin quiet
+            cvx_precision best
             variable x(Q * M, I) complex;
             expression part1(I);
             part1(1) = quad_form(x(:, 1), Jk) - 2 * real(x(:, 1)' * d(:, 1));

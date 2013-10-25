@@ -7,21 +7,24 @@ I = 10;
 SNRdB = 0;
 SNR = 10^(SNRdB / 10);
 P = SNR / Q;
-clusterLocations = zeros(1, K);
+clusters = zeros(K, 1);
 r = 1000;
 if K == 1
-    clusterLocations = 0 + 0j;
+    clusters = 0 + 0j;
 elseif K == 4
-    clusterLocations = [0 + 0j, ...
-                        0 + r * 1j, ...
-                        r * cos(pi / 6) + r * sin(pi / 6) * 1j, ...
-                        -r * cos(pi / 6) + r * sin(pi / 6) * 1j];
+    clusters = [0 + 0j, ...
+                0 + r * 1j, ...
+                r * cos(pi / 6) + r * sin(pi / 6) * 1j, ...
+                -r * cos(pi / 6) + r * sin(pi / 6) * 1j];
 end
-closures = findClusterClosures(clusterLocations, r * 0.9);
+closures = findClusterClosures(clusters, r * 0.9);
 %L = ones(K, 1) * Q * K / I / sqrt(SNR);
-L = ones(K, 1) * 1;
+[bss, ues] = brownian(K, Q, I, clusters, r / sqrt(3));
+H = generateMIMOChannel(K, Q, M, bss, I, N, ues, 2);
+L = generateLambdas(K, Q, M, I, N, P, H, SNR, 1);
 method = 'bcd';
-[bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
+[bss, ues] = brownian(K, Q, I, clusters, r / sqrt(3));
+H = generateMIMOChannel(K, Q, M, bss, I, N, ues, 2);
 
 numCases = 50;
 totalSumRate = 0;
@@ -33,8 +36,9 @@ reserve = 1e-6;
 for i = 1 : numCases
     numIterations = 0;
     prev = 0;
-    [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
-    H = generateMIMOChannel(K, Q, M, bsLocations, I, N, ueLocations, 2);
+    [bss, ues] = brownian(K, Q, I, clusters, r / sqrt(3));
+    H = generateMIMOChannel(K, Q, M, bss, I, N, ues, 2);
+    L = generateLambdas(K, Q, M, I, N, P, H, SNR, 2);
     [V, A] = generateRandomTxVector(K, Q, M, I, P, closures);
     [U, W, R, obj] = updateSWMmseVariables(K, Q, M, I, N, H, V);
     numServgingBSs = 0;

@@ -2,20 +2,20 @@ clear;
 K = 4;
 M = 4;
 N = 2;
-Q = 20;
-I = 40;
-SNRdB = 25;
+Q = 5;
+I = 10;
+SNRdB = 0;
 SNR = 10^(SNRdB / 10);
 P = SNR / Q;
-r = 2000;
+r = 1000;
 clusters = zeros(K, 1);
 if K == 1
     clusters = 0 + 0j;
 elseif K == 4
     clusters = [0 + 0j, ...
-                        0 + r * 1j, ...
-                        r * cos(pi / 6) + r * sin(pi / 6) * 1j, ...
-                        -r * cos(pi / 6) + r * sin(pi / 6) * 1j];
+                0 + r * 1j, ...
+                r * cos(pi / 6) + r * sin(pi / 6) * 1j, ...
+                -r * cos(pi / 6) + r * sin(pi / 6) * 1j];
 end
 closures = findClusterClosures(clusters, 0.9 * r);
 [bss, ues] = brownian(K, Q, I, clusters, r / sqrt(3));
@@ -44,9 +44,11 @@ for i = 1 : numCases
         [U, W, R] = updateWMMSEVariables(K, Q, M, I, N, H, V);
         fprintf(2, '  %d.%d Sum rate %f\n', i, numIterations, sum(R));
     end
-    fprintf(2, 'Case #%d: R = %f, # = %d\n', i, sum(R), numIterations);
+    fprintf(2, '->Case #%d: R = %f, # = %d\n', i, sum(R), numIterations);
     totalSumRate = totalSumRate + sum(R);
     totalNumIterations = totalNumIterations + numIterations;
+    fprintf(2, '=>Current avg sum rate: %f\n', totalSumRate / i);
+    fprintf(2, '=>Current avg number of iterations: %f\n', totalNumIterations / i);
 end
 fprintf(2, 'Avg sum rate: %f\n', totalSumRate / numCases);
 fprintf(2, 'Avg number of iterations: %f\n', totalNumIterations / numCases);

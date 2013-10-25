@@ -33,12 +33,14 @@ function V = iterateWMMSE(K, Q, M, I, N, mmse, P, H, W, U)
         targetValue = 0;
         multiplier = (miuLow + miuHigh) / 2;
         targetValue = mmseBisectionTarget(phi, lambda, multiplier);
-        while abs(targetValue - P * Q) / (P * Q) >= 1e-6
+        while abs(targetValue - P * Q) / (P * Q) >= 1e-14
             targetValue = mmseBisectionTarget(phi, lambda, multiplier);
             if targetValue > P * Q
                 miuLow = multiplier;
             elseif targetValue < P * Q
                 miuHigh = multiplier;
+            else
+                break;
             end
             multiplier = (miuLow + miuHigh) / 2;
         end

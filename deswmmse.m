@@ -59,17 +59,17 @@ while numIterations < maxIterations
         Rc = ceil(K * I * rand);
         Ln = Li;
         for q = 1 : K * Q
-            for i = 1 : K * I
+            for j = 1 : K * I
                 ri = rand;
-                if ri < CR || (q == Rr && i == Rc)
-                    Ln(q, i) = La(q, i) + dw * (Lb(q, i) - Lc(q, i));
+                if ri < CR || (q == Rr && j == Rc)
+                    Ln(q, j) = La(q, j) + dw * (Lb(q, j) - Lc(q, j));
                 else
-                    Ln(q, i) = Li(q, i);
+                    Ln(q, j) = Li(q, j);
                 end
             end
         end
         [Rn, servBSsn, objn] = deSWMmseUnit(K, Q, M, I, N, H, U, V, W, Ln, P, numUnitIters, reserve, method);
-        fprintf(2, '  %d.%d obj of Li %f, obj of Ln %f', numIterations, i, obji, objn);
+        fprintf(2, '  %d.%d obj of Li %f, obj of Ln %f\n', numIterations, i, obji, objn);
         if objn > obji
             Obj(i) = objn;
             LL(:, (i - 1) * size(L, 2) + 1 : i * size(L, 2)) = Ln;

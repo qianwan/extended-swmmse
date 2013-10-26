@@ -38,7 +38,7 @@ CR = 0.5;
 dw = 1;
 Obj = zeros(1, numAgents);
 
-maxIterations = 10;
+maxIterations = 20;
 numIterations = 0;
 while numIterations < maxIterations
     numIterations = numIterations + 1;
@@ -76,5 +76,6 @@ while numIterations < maxIterations
             Obj(i) = obji;
         end
     end
-    R
+    [a, index] = max(Obj);
+    fprintf(2, '=>Current winner is agent #d\n', index);
 end

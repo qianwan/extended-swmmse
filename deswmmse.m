@@ -37,7 +37,7 @@ for i = 1 : size(LL, 1)
 end
 CR = 0.5;
 dw = 1;
-R = zeros(1, numAgents);
+Obj = zeros(1, numAgents);
 
 maxIterations = 10;
 numIterations = 0;
@@ -69,11 +69,12 @@ while numIterations < maxIterations
             end
         end
         [Rn, servBSsn, objn] = deSWMmseUnit(K, Q, M, I, N, H, U, V, W, Ln, P, numUnitIters, reserve, method);
+        fprintf(2, '  %d.%d obj of Li %f, obj of Ln %f', numIterations, i, obji, objn);
         if objn > obji
-            R(i) = objn;
+            Obj(i) = objn;
             LL(:, (i - 1) * size(L, 2) + 1 : i * size(L, 2)) = Ln;
         else
-            R(i) = obji;
+            Obj(i) = obji;
         end
     end
     R

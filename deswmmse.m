@@ -22,7 +22,7 @@ closures = findClusterClosures(clusters, r * 0.9);
 H = generateMIMOChannel(K, Q, M, bss, I, N, ues, 2);
 L = generateLambdas(K, Q, M, I, N, P, H, SNR, 2);
 [V, A] = generateRandomTxVector(K, Q, M, I, P, closures);
-[U, W, R, obj] = updateSWMmseVariables(K, Q, M, I, N, H, V);
+[U, W, R, obj] = updateSWMmseVariables(K, Q, M, I, N, H, V, L);
 reserve = 1e-6;
 method = 'bcd';
 numUnitIters = 3;
@@ -61,7 +61,7 @@ while numIterations < maxIterations
             for j = 1 : K * I
                 ri = rand;
                 if ri < CR || (q == Rr && j == Rc)
-                    Ln(q, j) = La(q, j) + dw * (Lb(q, j) - Lc(q, j));
+                    Ln(q, j) = La(q, j) * Lb(q, j) / Lc(q, j);
                 else
                     Ln(q, j) = Li(q, j);
                 end

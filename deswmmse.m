@@ -77,5 +77,5 @@ while numIterations < maxIterations
         end
     end
     [a, index] = max(Obj);
-    fprintf(2, '=>Current winner is agent #d\n', index);
+    fprintf(2, '=>Current winner is agent #%d\n', index);
 end

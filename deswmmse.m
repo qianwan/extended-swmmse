@@ -28,8 +28,7 @@ method = 'bcd';
 numUnitIters = 3;
 
 numAgents = 20;
-LL = zeros(size(L, 1), size(L, 2) * numAgents);
-LL(:, 1 : size(L, 2)) = L;
+LL = repmat(L, [1 numAgents]);
 for i = 1 : size(LL, 1)
     for j = size(L, 2) + 1 : size(LL, 2)
         LL(i, j) = LL(i, j) + LL(i, j) * (rand - 0.5);

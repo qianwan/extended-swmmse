@@ -30,19 +30,18 @@ function [U, W, R, obj] = updateSWMmseVariables(K, Q, M, I, N, H, V, L)
             U(offset + 1 : offset + N, :) = u;
             W((k - 1) * I + i) = 1 / (1 - real(localHv' * u));
             localHvvH = localHv * localHv';
-            L = C - localHvvH;
-            R((k - 1) * I + i) = log2(real(det(eye(N) + localHvvH / L)));
+            Lc = C - localHvvH;
+            R((k - 1) * I + i) = log2(real(det(eye(N) + localHvvH / Lc)));
         end
     end
     obj = sum(R);
     for k = 1 : K
-        lambda = L(k);
         for i = 1 : I
             colOffset = (k - 1) * I + i;
             for q = 1 : Q
                 rowOffset = (k - 1) * Q * M + (q - 1) * M;
                 v = V(rowOffset + 1 : rowOffset + M, colOffset);
-                obj = obj - lambda * norm(v, 2);
+                obj = obj - L((k - 1) * Q + q, (k - 1) * I + i) * norm(v, 2);
             end
         end
     end

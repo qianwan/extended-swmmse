@@ -9,7 +9,7 @@ function X = optimizeSWMmseBcd(K, Q, M, I, J, D, V, L, P)
                 break;
             end
             T = zeros(Q, 1);
-            for q = randperm(Q)
+            for q = 1 : Q
                 rowOffset = (k - 1) * Q;
                 colOffset = (k - 1) * I;
                 lambdas = L(rowOffset + q, colOffset + 1 : colOffset + I);

@@ -4,11 +4,7 @@ function X = optimizeSWMmseBcd(K, Q, M, I, J, D, V, L, P)
         count  = 0;
         prev = 0;
         while true
-            fprintf(2, '%d', k);
             count = count + 1;
-            if mod(count, 50) == 0
-                fprintf(2, '\n');
-            end
             if count > 100
                 break;
             end
@@ -53,7 +49,7 @@ function X = optimizeSWMmseBcd(K, Q, M, I, J, D, V, L, P)
                         while true
                             delta(i) = (deltaLow(i) + deltaHigh(i)) / 2;
                             target = bisectionTarget(Jkq, C(:, i), delta(i), lambdas(i), miu);
-                            if abs(target - 1) < 2e-14
+                            if abs(target - 1) < 2e-8
                                 break;
                             end
                             if target < 1
@@ -97,8 +93,6 @@ function X = optimizeSWMmseBcd(K, Q, M, I, J, D, V, L, P)
             end
             prev = obj;
         end
-        fprintf(2, '\n');
-        %fprintf(2, 'obj of #%d subproblem %f\n', k, objectiveSubprolem(Q, M, I, X, J, D, L, k));
     end
     return
 

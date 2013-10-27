@@ -4,7 +4,7 @@ M = 4;
 N = 2;
 Q = 5;
 I = 10;
-SNRdB = 5;
+SNRdB = 0;
 SNR = 10^(SNRdB / 10);
 P = SNR / Q;
 clusters = zeros(K, 1);
@@ -37,9 +37,9 @@ for i = 1 : numCases
     prev = 0;
     [bss, ues] = brownian(K, Q, I, clusters, r / sqrt(3));
     H = generateMIMOChannel(K, Q, M, bss, I, N, ues, 2);
-    L = generateLambdas(K, Q, M, I, N, P, H, SNR, 2);
     [V, A] = generateRandomTxVector(K, Q, M, I, P, closures);
     [U, W, R, obj] = updateSWMmseVariables(K, Q, M, I, N, H, V, L);
+    L = adaptiveLassoWeights(K, Q, M, I, V, @(x)(1.5 * tanh(x / 10)));
     numServgingBSs = 0;
     while abs(prev - obj) > epsilon
         prev = obj;
@@ -51,6 +51,7 @@ for i = 1 : numCases
         [J, D] = updateSWMmseMatrix(K, Q, M, I, N, H, U, W);
         V = optimizeSWMmse(K, Q, M, I, J, D, V, L, P, method);
         [U, W, R, obj] = updateSWMmseVariables(K, Q, M, I, N, H, V, L);
+        L = adaptiveLassoWeights(K, Q, M, I, V, @(x)(1.5 * tanh(x / 10)));
         numServgingBSs = getNumServingBSs(K, Q, M, I, V, reserve);
         fprintf(2, '  %d.%d Sum rate %f, obj %f, serv BSs %f\n', ...
             i, numIterations, sum(R), obj, numServgingBSs / I / K);

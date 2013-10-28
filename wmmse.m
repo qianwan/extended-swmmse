@@ -25,7 +25,7 @@ for i = 1 : numCases
     prev = 0;
     [bsLocations, ueLocations] = brownian(K, Q, I, clusterLocations, r / sqrt(3));
     H = generateMIMOChannel(K, Q, M, bsLocations, I, N, ueLocations, 2);
-    [V, A] = generateRandomTxVector(K, Q, M, I, P, closures);
+    [V, A] = generateRandomTxVector(K, Q, M, I, N, P, H, closures, 1);
     [U, W, R] = updateWMMSEVariables(K, Q, M, I, N, H, V);
     while abs(prev - sum(R)) > epsilon
         prev = sum(R);

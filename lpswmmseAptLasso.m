@@ -97,16 +97,16 @@ for ci = 1 : numCases
         [mmse, omega, ols] = updateLPSWMmseMatrix(K, Q, M, I, N, H, U, W, S, T, numCand);
         % Lp = L ./ (ols.^lassoGamma);
         [V, D, subIter, innerObj, normSt] = updateLPSWMmseTxVector(K, Q, M, I, N, H, A, V, ...
-            U, W, S, T, P, Lp, mmse, omega, numCand, 1, false);
+            U, W, S, T, P, Lp, mmse, omega, numCand, numCand / 2, false);
         innerPrev = 0;
         innerCnt = 1;
-        fprintf(2, '%d.%d.%d obj=%f\n', ci, numIterations, innerCnt, innerObj);
+        % fprintf(2, '%d.%d.%d obj=%f\n', ci, numIterations, innerCnt, innerObj);
         while abs(innerPrev - innerObj) > innerEpsilon
             innerIter(ci) = innerIter(ci) + 1;
             innerPrev = innerObj;
             An = updateLPSWMmsePowerAlloc(K, Q, A, D, S, P, alpha / innerCnt);
             [X, DT, subIter, innerObj, normSt] = updateLPSWMmseTxVector(K, Q, M, I, N, H, An, V, ...
-                U, W, S, T, P, Lp, mmse, omega, numCand, 1, false);
+                U, W, S, T, P, Lp, mmse, omega, numCand, numCand / 2, false);
             bAlpha = alpha;
             cc = 1;
             while innerObj > innerPrev
@@ -117,7 +117,7 @@ for ci = 1 : numCases
                 end
                 An = updateLPSWMmsePowerAlloc(K, Q, A, D, S, P, bAlpha / innerCnt);
                 [X, DT, subIter, innerObj, normSt] = updateLPSWMmseTxVector(K, Q, M, I, N, H, An, V, ...
-                    U, W, S, T, P, Lp, mmse, omega, numCand, 1, false);
+                    U, W, S, T, P, Lp, mmse, omega, numCand, numCand / 2, false);
             end
             V = X;
             D = DT;

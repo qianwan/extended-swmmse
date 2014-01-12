@@ -123,7 +123,7 @@ for ci = 1 : numCases
             D = DT;
             A = An;
             innerCnt = innerCnt + 1;
-            fprintf(2, '%d.%d.%d obj=%f\n', ci, numIterations, innerCnt, innerObj);
+            % fprintf(2, '%d.%d.%d obj=%f\n', ci, numIterations, innerCnt, innerObj);
         end
         [U, W, R, obj, Sv] = updateLPSWMmseVariables(K, Q, M, I, N, H, S, V, Lp);
         fprintf(2, '%d.%d Obj=%f, R=%f, Sv=%f, SvMin=%d, SvMax=%d\n', ci, numIterations, ...

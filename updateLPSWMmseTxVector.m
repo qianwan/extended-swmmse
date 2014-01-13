@@ -22,13 +22,13 @@ function [X, D, Iter, Obj, normSt] = updateLPSWMmseTxVector(K, Q, M, I, N, H, A,
         while abs(prev - subObj) > 1e-4
             Iter(ik) = Iter(ik) + 1;
             prev = subObj;
-            xik = vik; % for parallel
+            % xik = vik; % for parallel
             for index = 1 : length(Sik)
                 ql = Sik(index);
                 h = H((ik - 1) * N + 1 : ik * N, (ql - 1) * M + 1 : ql * M);
                 mmseql = Mik((index - 1) * M + 1 : index * M, :);
-                gql = 2 * (mmseql * xik - w * h' * u);
-                vql = xik((index - 1) * M + 1 : index * M);
+                gql = 2 * (mmseql * vik - w * h' * u);
+                vql = vik((index - 1) * M + 1 : index * M);
                 omegaql = omega(ik, index);
                 normvgql = norm(b * omegaql * vql / 2 - gql);
                 normSt(ik, index) = normvgql;

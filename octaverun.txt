@@ -1,0 +1,32 @@
+0dB, cand = 5, L = 0.01, gamma = 1.1
+    alpha = 2e-3, R = 255, Sv = 1.6
+    alpha = 5e-3, R = 238, Sv = 1.0
+    alpha = 4e-2, R = 219, Sv = 0.56
+    alpha = 2e-2, R = 218, Sv = 0.62
+0dB, cnad = 5, L = 0, gamma = 0
+    alpha = 5e-3, R = 239, Sv = 1.0
+
+Expt 0dB, L = 0, gamma = 0, C = 20
+    alpha = 1e-1, R = 216, Sv = 0.52
+    alpha = 5e-2, R = 217, Sv = 0.55
+    alpha = 1e-2, R = 222, Sv = 0.77
+    alpha = 1e-3, R = 264, Sv = 3.9
+    alpha = 5e-4, R = 271, Sv = 5.3
+    alpha = 1e-4, R = 276, Sv = 6.9
+    alpha = 5e-5, R = , Sv = 
+    alpha = , R = , Sv = 
+
+Expt 5dB, L = 0, gamma = 0, C = 20
+    alpha = 5e-3, R = 389, Sv = 5.8
+    alpha = 1e-3, R = 398, Sv = 8.1
+    alpha = 5e-4, R = 394, Sv = 9.3
+    alpha = 1e-4, R = 403, Sv = 12.5
+    alpha = 5e-5, R = 396, Sv = 14.6
+    alpha = 1e-5, R = 375, Sv = 19.0
+
+Expt 10dB, L = 0, gamma = 0, C = 20
+    alpha = 5e-4, R = , Sv = 
+    alpha = 1e-4, R = 533, Sv = 18.9
+
+Expt 15dB, L = 0, gamma = 0, C = 20
+    

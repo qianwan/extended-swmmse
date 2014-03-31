@@ -1,7 +1,8 @@
-function [U, W, R] = updateWMMSEVariables(K, Q, M, I, N, H, V)
+function [U, W, R, pc] = updateWMMSEVariables(K, Q, M, I, N, H, V)
     U = zeros(K * I * N, 1);
     W = zeros(K * I, 1);
     R = zeros(K * I, 1);
+    pc = 0;
     for k = 1 : K
         for i = 1 : I
             C = zeros(N);
@@ -28,5 +29,8 @@ function [U, W, R] = updateWMMSEVariables(K, Q, M, I, N, H, V)
             L = C - localHv * localHv';
             R((k - 1) * I + i) = log2(real(det(eye(N) + localHv * localHv' / L)));
         end
+    end
+    for ik = 1 : K * I
+        pc = pc + norm(V(:, ik), 2)^2;
     end
     return
